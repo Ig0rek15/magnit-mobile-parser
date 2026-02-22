@@ -1,5 +1,6 @@
 from typing import Generator
 
+from magnit_parser.config import DEFAULT_OFFSET, MIN_AVAILABLE_QUANTITY
 from magnit_parser.client import MagnitClient
 from magnit_parser.models import Product
 from magnit_parser.utils import extract_brand, normalize_price
@@ -11,18 +12,19 @@ class MagnitParser:
 
     def parse_category(
         self,
+        city: str,
         city_id: str,
-        category_id: int,
         store_code: str,
-        limit: int = 20,
+        category_id: int,
+        limit: int,
     ) -> Generator[Product, None, None]:
-        offset = 0
+        offset = DEFAULT_OFFSET
 
         while True:
             data = self.client.search_goods(
                 city_id=city_id,
-                category_id=category_id,
                 store_code=store_code,
+                category_id=category_id,
                 limit=limit,
                 offset=offset,
             )
@@ -32,10 +34,11 @@ class MagnitParser:
                 break
 
             for item in items:
-                if item.get('quantity', 0) <= 0:
+                if item.get('quantity', 0) <= MIN_AVAILABLE_QUANTITY:
                     continue
 
                 product_id = item.get('id')
+
                 details = self.client.get_product_details(
                     product_id=product_id,
                     store_code=store_code,
@@ -52,7 +55,7 @@ class MagnitParser:
                     ),
                     promo_price=normalize_price(details.get('price')),
                     brand=brand,
-                    city_id=city_id,
+                    city=city,
                 )
 
             offset += limit

@@ -1,9 +1,16 @@
 import requests
 
+from magnit_parser.config import (
+    BASE_URL,
+    SEARCH_SORT,
+    STORE_TYPE,
+    CATALOG_TYPE,
+    TARGET_CART,
+    REQUEST_TIMEOUT,
+)
+
 
 class MagnitClient:
-    BASE_URL = 'https://middle-api.magnit.ru'
-
     def __init__(self) -> None:
         self.session = requests.Session()
         self.session.headers.update(
@@ -17,24 +24,24 @@ class MagnitClient:
     def search_goods(
         self,
         city_id: str,
-        category_id: int,
         store_code: str,
+        category_id: int,
         limit: int,
         offset: int,
     ) -> dict:
-        url = f'{self.BASE_URL}/v2/goods/search'
+        url = f'{BASE_URL}/v2/goods/search'
 
         payload = {
             'cityId': city_id,
-            'sort': {'order': 'desc', 'type': 'popularity'},
+            'sort': SEARCH_SORT,
             'categories': [category_id],
             'storeCode': store_code,
-            'storeType': 'express',
+            'storeType': STORE_TYPE,
             'pagination': {'limit': limit, 'offset': offset},
-            'catalogType': '2',
+            'catalogType': CATALOG_TYPE,
         }
 
-        response = self.session.post(url, json=payload, timeout=15)
+        response = self.session.post(url, json=payload, timeout=REQUEST_TIMEOUT)
         response.raise_for_status()
         return response.json()
 
@@ -45,11 +52,13 @@ class MagnitClient:
         city_id: str,
     ) -> dict:
         url = (
-            f'{self.BASE_URL}/v2/goods/{product_id}/stores/{store_code}'
-            f'?catalogtype=2&cityid={city_id}'
-            f'&storetype=express&targetCart=express'
+            f'{BASE_URL}/v2/goods/{product_id}/stores/{store_code}'
+            f'?catalogtype={CATALOG_TYPE}'
+            f'&cityid={city_id}'
+            f'&storetype={STORE_TYPE}'
+            f'&targetCart={TARGET_CART}'
         )
 
-        response = self.session.get(url, timeout=15)
+        response = self.session.get(url, timeout=REQUEST_TIMEOUT)
         response.raise_for_status()
         return response.json()
