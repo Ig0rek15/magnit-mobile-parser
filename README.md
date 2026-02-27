@@ -29,7 +29,3 @@ python main.py
 ```
 ---
 
-Жду ЛЮБУЮ обратную связь(если укажете, где можно было лучше, буду благодарен)
-
-- tg - @Igor_abaev1
-- email - igorabaev24@gmail.com
